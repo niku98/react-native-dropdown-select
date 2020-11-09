@@ -32,7 +32,13 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "dropdown-select",
+    "selector",
+    "dropdown-modal",
+    "select",
+    "picker",
+    "dropdown-picker"
   ],
   "repository": "https://github.com/niku98/react-native-dropdown-select",
   "author": "Niku <phammanh.1221998@gmail.com> (https://github.com/niku98)",
@@ -41,6 +47,9 @@
     "url": "https://github.com/niku98/react-native-dropdown-select/issues"
   },
   "homepage": "https://github.com/niku98/react-native-dropdown-select#readme",
+  "dependencies": {
+    "react-native-status-bar-height": "^2.5.0"
+  },
   "devDependencies": {
     "@commitlint/config-conventional": "^8.3.4",
     "@react-native-community/bob": "^0.16.2",
@@ -57,14 +66,14 @@
     "jest": "^26.0.1",
     "pod-install": "^0.1.0",
     "prettier": "^2.0.5",
-    "react": "16.11.0",
-    "react-native": "0.62.2",
     "release-it": "^13.5.8",
     "typescript": "^3.8.3"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
+    "@types/react": "*",
+    "@types/react-native": "0.63.2",
+    "react": "16.13.1",
+    "react-native": "0.63.2"
   },
   "jest": {
     "preset": "react-native",
@@ -107,6 +116,9 @@
       "prettier"
     ],
     "rules": {
+      "react-hooks/exhaustive-deps": [
+        0
+      ],
       "prettier/prettier": [
         "error",
         {
@@ -119,7 +131,10 @@
       ]
     }
   },
-  "eslintIgnore": ["node_modules/", "lib/"],
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ],
   "prettier": {
     "quoteProps": "consistent",
     "singleQuote": true,
@@ -130,6 +145,10 @@
   "@react-native-community/bob": {
     "source": "src",
     "output": "lib",
-    "targets": ["commonjs", "module", "typescript"]
+    "targets": [
+      "commonjs",
+      "module",
+      "typescript"
+    ]
   }
 }

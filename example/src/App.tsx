@@ -1,18 +1,34 @@
 import * as React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import DropdownSelect from 'react-native-dropdown-select';
+import { defaultValue, options } from './constants';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
-    DropdownSelect.multiply(3, 7).then(setResult);
-  }, []);
-
+  const [value, setValue] = React.useState(defaultValue);
   return (
-    <View style={styles.container}>
-      <Text>Result: {result}</Text>
-    </View>
+    <>
+      <View style={styles.container}>
+        <View>
+          <DropdownSelect
+            options={options}
+            defaultValue={defaultValue}
+            value={value}
+            onSelectOption={(option) => {
+              setValue(option.value);
+            }}
+            onHideDropdown={() => {
+              console.log('hide');
+            }}
+            onShowDropdown={() => {
+              console.log('show');
+            }}
+            withStatusBar={true}
+          />
+        </View>
+        <Text>{value}</Text>
+        <Button title="Default" onPress={() => setValue(defaultValue)} />
+      </View>
+    </>
   );
 }
 
@@ -21,5 +37,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 10,
   },
 });
