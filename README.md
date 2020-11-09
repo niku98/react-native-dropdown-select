@@ -1,9 +1,13 @@
-# react-native-dropdown-select
+# React Native Dropdown Select
 
-A Dropdown select component for React Native
+A Dropdown select component for React Native. Easy to use without any configuration.
 
-- [react-native-dropdown-select](#react-native-dropdown-select)
+## Table of contents
+- [React Native Dropdown Select](#react-native-dropdown-select)
+  - [Table of contents](#table-of-contents)
   - [Installation](#installation)
+    - [With npm](#with-npm)
+    - [With yarn](#with-yarn)
   - [Usage](#usage)
     - [When Status bar is hidden or translucent](#when-status-bar-is-hidden-or-translucent)
   - [Props](#props)
@@ -12,8 +16,14 @@ A Dropdown select component for React Native
 
 ## Installation
 
+### With npm
 ```sh
-npm install react-native-dropdown-select
+npm install @niku/react-native-dropdown-select
+```
+
+### With yarn
+```sh
+yarn add @niku/react-native-dropdown-select
 ```
 
 ## Usage
@@ -80,7 +90,7 @@ const styles = StyleSheet.create({
 ```
 
 ### When Status bar is hidden or translucent
-
+If your app doesn't show status bar or make it translucent, you have to change **`withStatusBar`** option to **`false`**
 ```js
 <DropdownSelect options={options} withStatusBar={false} />;
 ```

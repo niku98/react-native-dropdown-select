@@ -1,5 +1,5 @@
 {
-  "name": "react-native-dropdown-select",
+  "name": "@niku/react-native-dropdown-select",
   "version": "0.1.0",
   "description": "A Dropdown select component for React Native",
   "main": "lib/commonjs/index",
@@ -40,7 +40,10 @@
     "picker",
     "dropdown-picker"
   ],
-  "repository": "https://github.com/niku98/react-native-dropdown-select",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/niku98/react-native-dropdown-select.git"
+  },
   "author": "Niku <phammanh.1221998@gmail.com> (https://github.com/niku98)",
   "license": "MIT",
   "bugs": {
@@ -150,5 +153,9 @@
       "module",
       "typescript"
     ]
+  },
+  "directories": {
+    "example": "example",
+    "lib": "lib"
   }
 }
