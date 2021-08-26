@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "react-native-dropdown-select": ["./src/index"]
+      "@niku/react-native-dropdown-select": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
