@@ -1,15 +1,20 @@
 # React Native Dropdown Select
 
-A Dropdown select component for React Native. Easy to use without any configuration.
+A Dropdown select component for React Native. Easy to use with only one needed configuration.
+
+## Demo
+<img src="https://github.com/niku98/react-native-dropdown-select/blob/master/screenshots/demo_1.gif?raw=true" width="170" alt="Demo 1"/>
 
 ## Table of contents
 - [React Native Dropdown Select](#react-native-dropdown-select)
+  - [Demo](#demo)
   - [Table of contents](#table-of-contents)
   - [Installation](#installation)
     - [With npm](#with-npm)
     - [With yarn](#with-yarn)
+  - [Add SafeAreaProvider](#add-safeareaprovider)
   - [Usage](#usage)
-    - [When Status bar is hidden or translucent](#when-status-bar-is-hidden-or-translucent)
+  - [What's new](#whats-new)
   - [Props](#props)
   - [Contributing](#contributing)
   - [License](#license)
@@ -18,12 +23,26 @@ A Dropdown select component for React Native. Easy to use without any configurat
 
 ### With npm
 ```sh
-npm install @niku/react-native-dropdown-select
+npm install react-native-safe-area-context @niku/react-native-dropdown-select
 ```
 
 ### With yarn
 ```sh
-yarn add @niku/react-native-dropdown-select
+yarn add react-native-safe-area-context @niku/react-native-dropdown-select
+```
+
+## Add SafeAreaProvider
+You have to add `SafeAreaProvider` at your App's root (App.tsx/App.jsx).
+```js
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+export function App() {
+  return (
+    <SafeAreaProvider>
+    {/* ... */}
+  </SafeAreaProvider>
+  );
+}
 ```
 
 ## Usage
@@ -31,22 +50,56 @@ yarn add @niku/react-native-dropdown-select
 ```js
 // ...
 import DropdownSelect from 'react-native-dropdown-select';
-
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 // ...
 
 const options = [
   {
-    label: 'Javascript',
-    value: 'js',
+    label: "Select language or framework you love",
+    value: null,
   },
   {
-    label: 'Typescript',
-    value: 'ts',
+    label: "Languages",
+    options: [
+      {
+        label: 'Javascript',
+        value: 'js',
+      },
+      {
+        label: 'Typescript',
+        value: 'ts',
+      },
+      {
+        label: 'Python',
+        value: 'py',
+      }
+    ]
   },
   {
-    label: 'Python',
-    value: 'py',
+    label: "Frameworks - Libraies",
+    options: [
+      {
+        label: 'Reactjs',
+        value: 'reactjs',
+      },
+      {
+        label: 'React Native',
+        value: 'react-native',
+      },
+      {
+        label: 'Vuejs',
+        value: 'vuejs',
+      },
+      {
+        label: "Laravel",
+        value: "laravel"
+      }
+    ]
   },
+  {
+    label: "Others",
+    value: "others"
+  }
 ];
 
 const defaultValue = 'js';
@@ -54,7 +107,7 @@ const defaultValue = 'js';
 function App() {
   const [value, setValue] = React.useState(defaultValue);
   return (
-    <>
+    <SafeAreaProvider>
       <View style={styles.container}>
         <View>
           <DropdownSelect
@@ -75,7 +128,7 @@ function App() {
         <Text>{value}</Text>
         <Button title="Default" onPress={() => setValue(defaultValue)} />
       </View>
-    </>
+    </SafeAreaProvider>
   );
 }
 
@@ -89,11 +142,10 @@ const styles = StyleSheet.create({
 });
 ```
 
-### When Status bar is hidden or translucent
-If your app doesn't show status bar or make it translucent, you have to change **`withStatusBar`** option to **`false`**
-```js
-<DropdownSelect options={options} withStatusBar={false} />;
-```
+## What's new
+There are some new features in this verson.
+- **Option group**: You can group your option. Both *option item* and *option group* can be mixed in props `options` (See in **Usage** above).
+- **withStatusBar**: Deprecated. I caculate position of dropdown button with `react-native-safe-area-context`'s frame and insets. So, we don't need this props anymore.
 
 ## Props
 | Name                     | Description                                                                             | Type                                             | Default                 | Required |
@@ -104,14 +156,16 @@ If your app doesn't show status bar or make it translucent, you have to change *
 | position                 | Position of dropdown                                                                    | `'top' | 'bottom'`                               | `'bottom'`              | No       |
 | placeholder              | Placeholder of dropdown select to display when no option selected                       | `string`                                         | `'Select an option...'` | No       |
 | loading                  | Loading state of dropdown select                                                        | `boolean`                                        | `false`                 | No       |
-| withStatusBar            | Default is `true`, change it to `false` if status bar is **hidden** or **translucent**  | `boolean`                                        | `true`                  | No       |
+| withStatusBar            | Deprecated                                                                              | `boolean`                                        | `true`                  | No       |
 | component                | Component to render dropdown button                                                     | `React.ComponentType | React.ReactNode`          |                         | No       |
-| render                   | Render dropdown button via render function                                              | `(props) => React.ReactElement`                  |                         | No       |
+| render                   | Render dropdown button via render function                                              | `(props) => React.ReactNode`                     |                         | No       |
 | children                 | Loading state of dropdown select                                                        | `(props) => React.ReactElemnt | React.ReactNode` |                         | No       |
 | loadingComponent         | Loading component to render loading icon                                                | `React.ComponentType | React.ReactNode`          |                         | No       |
-| renderLoading            | Render loading icon via render function                                                 | `() => React.ReactElement`                       |                         | No       |
+| renderLoading            | Render loading icon via render function                                                 | `() => React.ReactNode`                          |                         | No       |
 | optionComponent          | Option component to render option item                                                  | `React.ComponentType | React.ReactNode`          |                         | No       |
-| renderOption             | Render option item via render function                                                  | `(props) => React.ReactElement`                  |                         | No       |
+| renderOption             | Render option item via render function                                                  | `(props) => React.ReactNode`                     |                         | No       |
+| optionGroupComponent     | Option group component to render option group                                           | `React.ComponentType | React.ReactNode`          |                         | No       |
+| renderOptionGroup        | Render option group via render function                                                 | `(props) => React.ReactNode`                     |                         | No       |
 | compareFunc              | Compare function to compare two option, return `true` if equal otherwise return `false` | `(option1, option2) => boolean`                  |                         | No       |
 | onShowDropdown           | Callback function is called when dropdown will be shown                                 | `() => void`                                     |                         | No       |
 | onHideDropdown           | Callback function is called when dropdown will be hide                                  | `() => void`                                     |                         | No       |
@@ -123,8 +177,11 @@ If your app doesn't show status bar or make it translucent, you have to change *
 | dropdownStyle            | Additional styles for dropdown's container                                              | `object`                                         |                         | No       |
 | optionStyle              | Additional styles for option's container                                                | `object`                                         |                         | No       |
 | selectedOptionStyle      | Additional styles for selected option's container                                       | `object`                                         |                         | No       |
+| disabledOptionStyle      | Additional styles for disabled option's container                                       | `object`                                         |                         | No       |
 | optionLabelStyle         | Additional styles for option's label                                                    | `object`                                         |                         | No       |
 | selectedOptionLabelStyle | Additional styles for selected option's label                                           | `object`                                         |                         | No       |
+| disabledOptionLabelStyle | Additional styles for disabled option's label                                           | `object`                                         |                         | No       |
+| optionGroupPadding       | Padding left for nested option group                                                    | `number`                                         |                         | No       |
 
 ## Contributing
 

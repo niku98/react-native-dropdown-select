@@ -8,8 +8,10 @@ const OptionItem = ({
   style,
   labelStyle,
   activeStyle,
-  activeLableStyle,
+  activeLabelStyle,
   active,
+  disabledStyle,
+  disabledLabelStyle,
 }: DropdownOptionProps) => {
   return (
     <View
@@ -18,6 +20,7 @@ const OptionItem = ({
         style,
         active && styles.activeContainer,
         active && activeStyle,
+        option.disabled && disabledStyle,
       ]}
     >
       <Text
@@ -25,7 +28,9 @@ const OptionItem = ({
           styles.label,
           labelStyle,
           active && styles.activeLabel,
-          active && activeLableStyle,
+          active && activeLabelStyle,
+          option.disabled && styles.disabledLabel,
+          option.disabled && disabledLabelStyle,
         ]}
         numberOfLines={1}
       >
@@ -35,4 +40,4 @@ const OptionItem = ({
   );
 };
 
-export default OptionItem;
+export default React.memo(OptionItem);

@@ -5,7 +5,9 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 7,
+    paddingVertical: 7,
+    paddingLeft: 8,
+    paddingRight: 30,
     borderRadius: 3,
     backgroundColor: 'white',
     borderWidth: 1,
@@ -22,5 +24,7 @@ export const styles = StyleSheet.create({
   icon: {
     width: 20,
     height: 20,
+    position: 'absolute',
+    right: 8,
   },
 });

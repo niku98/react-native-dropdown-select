@@ -1,36 +1,23 @@
 import React, {
-  createElement,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
+  useEffect,
 } from 'react';
-import {
-  Animated,
-  Easing,
-  FlatList,
-  Modal,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-  ViewStyle,
-} from 'react-native';
-import OptionItem from '../OptionItem';
-import { styles } from './styles';
+import { Modal, TouchableOpacity } from 'react-native';
 import type {
   DropdownButtonProps,
   DropdownOption,
-  DropdownOptionProps,
   DropdownSelectConfig,
   Layout,
-  Position,
 } from '../types';
-import { isEmptyChildren, isFunction } from '../utils';
-import { DROPDOWN_MIN_WIDTH } from '../constants';
+import { getRenderComponent } from '../utils';
 import { useDropdownSelect } from '../useDropDownSelect';
 import { DropdownButton } from '../DropdownButton';
-import { getStatusBarHeight } from 'react-native-status-bar-height';
+import DropdownModalContent from '../DropdownModalContent';
+import { DropdownLoading } from '../DropdownLoading';
+import { renderOptionItemOrGroup } from '../DropdownOptionGroup';
 
 function DropdownSelect<T = any>({
   component,
@@ -43,24 +30,31 @@ function DropdownSelect<T = any>({
   optionComponent,
   renderOption,
 
+  optionGroupComponent,
+  renderOptionGroup,
+
   position = 'bottom',
   placeholder = 'Select an option...',
   loading,
-  withStatusBar = true,
 
   buttonWrapperStyle,
 
   buttonContainerStyle,
   buttonLabelStyle,
   buttonIconStyle,
+  buttonPlaceholderStyle,
 
   dropdownStyle,
 
   optionStyle,
   selectedOptionStyle,
+  disabledOptionStyle,
 
   optionLabelStyle,
   selectedOptionLabelStyle,
+  disabledOptionLabelStyle,
+
+  optionGroupPadding,
   ...configs
 }: DropdownSelectConfig<T>) {
   const { options } = configs;
@@ -72,62 +66,17 @@ function DropdownSelect<T = any>({
     showDropdown,
     hideDropdown,
     show,
-    chooseOption,
+    selectOption,
     selectedOption,
+    compareOption,
     addHideEventListener,
     addShowEventListener,
     removeHideEventListener,
     removeShowEventListener,
-    compareOption,
   } = useDropdownSelect(configs);
 
   /**
-   * Animation
-   */
-  const animationValue = useRef(new Animated.Value(0)).current;
-  const [isDropdownShown, setIsDropdownShown] = useState(false);
-
-  const onShowDropdownWithAnimation = useCallback(() => {
-    setIsDropdownShown(true);
-
-    Animated.timing(animationValue, {
-      toValue: 1,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [animationValue]);
-
-  const onHideDropdownWithAnimation = useCallback(() => {
-    Animated.timing(animationValue, {
-      toValue: 0,
-      duration: 250,
-      useNativeDriver: false,
-    }).start((result) => {
-      if (result.finished) {
-        setIsDropdownShown(false);
-      }
-    });
-  }, [animationValue]);
-
-  useEffect(() => {
-    addShowEventListener(onShowDropdownWithAnimation);
-    addHideEventListener(onHideDropdownWithAnimation);
-
-    return () => {
-      removeShowEventListener(onShowDropdownWithAnimation);
-      removeHideEventListener(onHideDropdownWithAnimation);
-    };
-  }, [
-    addHideEventListener,
-    addShowEventListener,
-    onHideDropdownWithAnimation,
-    onShowDropdownWithAnimation,
-    removeHideEventListener,
-    removeShowEventListener,
-  ]);
-
-  /**
-   * Dropdown Position
+   * Button position
    */
   const [containerLayout, setContainerLayout] = useState<Layout>({
     x: 0,
@@ -135,74 +84,47 @@ function DropdownSelect<T = any>({
     width: 0,
     height: 0,
   });
-  const [dropdownContainerHeight, setDropdownContainerHeight] = useState(0);
 
   const containerRef = useRef<TouchableOpacity>(null);
 
-  const measureContainer = useCallback(() => {
+  const measureContainer = useCallback((callback: () => void) => {
     containerRef.current?.measure((_x, _y, width, height, pageX, pageY) => {
       setContainerLayout({ x: pageX, y: pageY, width, height });
+      callback();
     });
   }, []);
 
-  const measureDropdownContainer = useCallback((e: any) => {
-    setDropdownContainerHeight(e.nativeEvent.layout.height);
+  /**
+   * Dropdown modal visible
+   */
+  const [modalVisible, setModalVisible] = useState(show);
+  const [dropdownContentVisible, setDropdownContentVisible] = useState(show);
+
+  const handleDropdownModalContentDismissed = useCallback(() => {
+    setModalVisible(false);
   }, []);
 
-  const dropdownContainerPositionStyles: ViewStyle = useMemo(() => {
-    const top = containerLayout.y + containerLayout.height;
-    const left = containerLayout.x;
-    const width =
-      containerLayout.width > DROPDOWN_MIN_WIDTH
-        ? containerLayout.width
-        : DROPDOWN_MIN_WIDTH;
-
-    let positionStyles: Position = {
-      top: top - 1 - (withStatusBar ? 0 : getStatusBarHeight()),
-      left: left,
-      width,
-    };
-
-    if (position === 'top') {
-      positionStyles.top =
-        containerLayout.y -
-        dropdownContainerHeight +
-        1 -
-        (withStatusBar ? 0 : getStatusBarHeight());
-    }
-
-    return positionStyles;
-  }, [
-    containerLayout.height,
-    containerLayout.width,
-    containerLayout.x,
-    containerLayout.y,
-    dropdownContainerHeight,
-    position,
-    withStatusBar,
-  ]);
-
   useEffect(() => {
-    addShowEventListener(measureContainer);
-    return () => {
-      removeShowEventListener(measureContainer);
+    const onShow = () => {
+      measureContainer(() => {
+        setModalVisible(true);
+        setDropdownContentVisible(true);
+      });
     };
-  }, [addShowEventListener, measureContainer, removeShowEventListener]);
+    addShowEventListener(onShow);
 
-  /**
-   * Animation translate
-   */
-  const dropdownContainerTranslateY = animationValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [
-      position === 'bottom'
-        ? -dropdownContainerHeight / 2
-        : dropdownContainerHeight / 2,
-      0,
-    ],
-    easing: Easing.linear,
-    extrapolate: 'clamp',
-  });
+    const onHide = () => {
+      measureContainer(() => {
+        setDropdownContentVisible(false);
+      });
+    };
+    addHideEventListener(onHide);
+
+    return () => {
+      removeShowEventListener(onShow);
+      removeHideEventListener(onHide);
+    };
+  }, [addHideEventListener, addShowEventListener]);
 
   /**
    * Combine styles
@@ -210,28 +132,6 @@ function DropdownSelect<T = any>({
   const combinedWrapperStyle = useMemo(() => {
     return [buttonWrapperStyle];
   }, [buttonWrapperStyle]);
-
-  const combinedDropdownStyle = useMemo(() => {
-    return [
-      styles.dropdownContainer,
-      dropdownContainerPositionStyles,
-      position === 'top' ? styles.dropdownContainerPositionTop : {},
-      {
-        transform: [
-          { translateY: dropdownContainerTranslateY },
-          { scaleY: animationValue },
-        ],
-        opacity: animationValue,
-      },
-      dropdownStyle,
-    ];
-  }, [
-    animationValue,
-    dropdownContainerPositionStyles,
-    dropdownContainerTranslateY,
-    dropdownStyle,
-    position,
-  ]);
 
   /**
    * Render
@@ -246,6 +146,7 @@ function DropdownSelect<T = any>({
       style: buttonContainerStyle,
       labelStyle: buttonLabelStyle,
       iconStyle: buttonIconStyle,
+      placeholderStyle: buttonPlaceholderStyle,
     };
   }, [
     show,
@@ -256,57 +157,50 @@ function DropdownSelect<T = any>({
     buttonContainerStyle,
     buttonLabelStyle,
     buttonIconStyle,
+    buttonPlaceholderStyle,
   ]);
 
   const computedChildren = useMemo(() => {
-    return component
-      ? createElement(component as any, buttonProps)
-      : render
-      ? render(buttonProps)
-      : children
-      ? isFunction(children)
-        ? children(buttonProps)
-        : !isEmptyChildren(children)
-        ? React.Children.only(children)
-        : createElement(DropdownButton as any, buttonProps)
-      : createElement(DropdownButton as any, buttonProps);
+    const childrenElement = getRenderComponent(
+      buttonProps,
+      component,
+      render,
+      children
+    );
+    return childrenElement || <DropdownButton {...buttonProps} />;
   }, [component, children, render, buttonProps]);
 
   const computedLoadingComponent = useMemo(() => {
-    return loadingComponent
-      ? createElement(loadingComponent as any)
-      : renderLoading
-      ? renderLoading()
-      : null;
+    const loadingElement = getRenderComponent(
+      {},
+      loadingComponent,
+      renderLoading
+    );
+    return loadingElement || <DropdownLoading />;
   }, [loadingComponent, renderLoading]);
 
   const renderItem = useCallback(
     ({ item: option }: { item: DropdownOption }) => {
-      const optionProps: DropdownOptionProps = {
-        option: option,
-        active: compareOption(selectedOption, option),
+      return renderOptionItemOrGroup({
+        compareOption,
+        renderOption,
+        renderOptionGroup,
+        selectedOption,
+        optionGroupComponent,
+        optionComponent,
         style: optionStyle,
-        activeStyle: selectedOptionStyle,
+        disabledStyle: disabledOptionStyle,
         labelStyle: optionLabelStyle,
-        activeLableStyle: selectedOptionLabelStyle,
-      };
-
-      const optionPressed = () => {
-        chooseOption(option);
-      };
-
-      return (
-        <TouchableOpacity onPress={optionPressed}>
-          {optionComponent
-            ? createElement(optionComponent as any, optionProps)
-            : renderOption
-            ? renderOption(optionProps)
-            : createElement(OptionItem, optionProps)}
-        </TouchableOpacity>
-      );
+        disabledLabelStyle: disabledOptionLabelStyle,
+        activeStyle: selectedOptionStyle,
+        activeLabelStyle: selectedOptionLabelStyle,
+        selectOption,
+        option,
+        optionGroupPadding,
+      });
     },
     [
-      chooseOption,
+      selectOption,
       compareOption,
       optionComponent,
       optionLabelStyle,
@@ -315,6 +209,11 @@ function DropdownSelect<T = any>({
       selectedOption,
       selectedOptionLabelStyle,
       selectedOptionStyle,
+      optionGroupComponent,
+      renderOptionGroup,
+      disabledOptionStyle,
+      disabledOptionLabelStyle,
+      optionGroupPadding,
     ]
   );
 
@@ -328,26 +227,19 @@ function DropdownSelect<T = any>({
       >
         {computedChildren}
       </TouchableOpacity>
-      <Modal
-        visible={isDropdownShown}
-        onDismiss={hideDropdown}
-        onRequestClose={hideDropdown}
-        transparent
-      >
-        <TouchableWithoutFeedback onPress={hideDropdown}>
-          <View style={styles.backdrop} />
-        </TouchableWithoutFeedback>
-        <Animated.View
-          onLayout={measureDropdownContainer}
-          style={combinedDropdownStyle}
-        >
-          <FlatList
-            renderItem={renderItem}
-            data={options}
-            keyExtractor={(item, index) => item.label + index.toString()}
-          />
-          {loading && computedLoadingComponent}
-        </Animated.View>
+      <Modal visible={modalVisible} transparent>
+        <DropdownModalContent
+          visible={dropdownContentVisible}
+          onDismiss={hideDropdown}
+          onDismissed={handleDropdownModalContentDismissed}
+          dropdownContainerStyle={dropdownStyle}
+          options={options}
+          renderItem={renderItem}
+          loading={loading}
+          loadingComponent={computedLoadingComponent}
+          buttonLayout={containerLayout}
+          position={position}
+        />
       </Modal>
     </>
   );

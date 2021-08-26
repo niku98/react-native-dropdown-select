@@ -1,10 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { DROPDOWN_MAX_HEIGHT, DROPDOWN_MIN_WIDTH } from '../constants';
+import { DROPDOWN_MAX_HEIGHT, DROPDOWN_MIN_WIDTH, screen } from '../constants';
 
 export const styles = StyleSheet.create({
   backdrop: {
-    width: '100%',
-    height: 500,
+    width: screen.width,
     flex: 1,
   },
   dropdownContainer: {

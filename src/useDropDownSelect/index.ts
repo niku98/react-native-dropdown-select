@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { DropdownOption, DropdownSelectConfig } from '../types';
-import { isDropdownOption } from '../utils';
+import type {
+  DropdownOption,
+  DropdownOptionItem,
+  DropdownSelectConfig,
+} from '../types';
+import { isDropdownOptionItem } from '../utils';
 
 export const useDropdownSelect = ({
   defaultValue,
@@ -12,7 +16,7 @@ export const useDropdownSelect = ({
   value,
 }: DropdownSelectConfig) => {
   const [show, setShow] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<DropdownOption>();
+  const [selectedOption, setSelectedOption] = useState<DropdownOptionItem>();
   const [showEventListeners, setShowEventListener] = useState<
     CallableFunction[]
   >([]);
@@ -120,8 +124,8 @@ export const useDropdownSelect = ({
     setShow(false);
   }, [callHideEventListeners]);
 
-  const chooseOption = useCallback(
-    (option: DropdownOption, fireEvent: boolean = true) => {
+  const selectOption = useCallback(
+    (option: DropdownOptionItem, fireEvent: boolean = true) => {
       if (fireEvent) {
         callChooseOptionEventListeners(option);
         hideDropdown();
@@ -132,7 +136,7 @@ export const useDropdownSelect = ({
   );
 
   const compareOption = useCallback(
-    (option1?: DropdownOption, option2?: DropdownOption) => {
+    (option1?: DropdownOptionItem, option2?: DropdownOptionItem) => {
       if (!option1 || !option2) {
         return false;
       }
@@ -146,33 +150,45 @@ export const useDropdownSelect = ({
     [compareFunc]
   );
 
-  useEffect(() => {
-    if (defaultValue) {
-      for (const option of options) {
-        const isCurrentOption = isDropdownOption(defaultValue)
-          ? compareOption(option, defaultValue)
-          : defaultValue === option.value;
-        if (isCurrentOption) {
-          chooseOption(option);
-          break;
+  const findOptionMatchValue = useCallback(
+    (
+      val: any,
+      inputOptions?: DropdownOption[]
+    ): DropdownOptionItem | undefined => {
+      if (!inputOptions) {
+        inputOptions = options;
+      }
+
+      if (val !== undefined) {
+        for (const option of inputOptions) {
+          if (isDropdownOptionItem(option)) {
+            const isCurrentOption = isDropdownOptionItem(val)
+              ? compareOption(option, val)
+              : val === option.value;
+            if (isCurrentOption) {
+              return option;
+            }
+          } else {
+            const matchedOption = findOptionMatchValue(val, option.options);
+            if (matchedOption) {
+              return matchedOption;
+            }
+          }
         }
       }
-    }
+
+      return undefined;
+    },
+    [options, compareOption, isDropdownOptionItem]
+  );
+
+  useEffect(() => {
+    setSelectedOption(findOptionMatchValue(defaultValue));
   }, []);
 
   useEffect(() => {
-    if (value) {
-      for (const option of options) {
-        const isCurrentOption = isDropdownOption(value)
-          ? compareOption(option, value)
-          : value === option.value;
-        if (isCurrentOption) {
-          chooseOption(option, false);
-          break;
-        }
-      }
-    }
-  }, [chooseOption, compareOption, options, value]);
+    setSelectedOption(findOptionMatchValue(value));
+  }, [value]);
 
   useEffect(() => {
     if (onShowDropdown) {
@@ -212,7 +228,7 @@ export const useDropdownSelect = ({
     show,
     showDropdown,
     hideDropdown,
-    chooseOption,
+    selectOption,
     selectedOption,
     addShowEventListener,
     addHideEventListener,

@@ -1,6 +1,6 @@
 {
   "name": "@niku/react-native-dropdown-select",
-  "version": "0.1.0",
+  "version": "1.0",
   "description": "A Dropdown select component for React Native",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -50,9 +50,6 @@
     "url": "https://github.com/niku98/react-native-dropdown-select/issues"
   },
   "homepage": "https://github.com/niku98/react-native-dropdown-select#readme",
-  "dependencies": {
-    "react-native-status-bar-height": "^2.5.0"
-  },
   "devDependencies": {
     "@commitlint/config-conventional": "^8.3.4",
     "@react-native-community/bob": "^0.16.2",
@@ -73,10 +70,9 @@
     "typescript": "^3.8.3"
   },
   "peerDependencies": {
-    "@types/react": "*",
-    "@types/react-native": "0.63.2",
     "react": "16.13.1",
-    "react-native": "0.63.2"
+    "react-native": "0.63.2",
+    "react-native-safe-area-context": "^3.3.0"
   },
   "jest": {
     "preset": "react-native",

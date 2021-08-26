@@ -25,16 +25,18 @@ export const DropdownButton = ({
   return (
     <View style={[styles.container, style]}>
       {selectedOption ? (
-        <Text style={[styles.label, labelStyle]} numberOfLines={1}>
-          {selectedOption.label}
-        </Text>
+        <View>
+          <Text style={[styles.label, labelStyle]} numberOfLines={1}>
+            {selectedOption.label}
+          </Text>
+        </View>
       ) : (
         <Text style={[styles.placeholder, placeholderStyle]} numberOfLines={1}>
           {placeholder}
         </Text>
       )}
       {loading ? (
-        <ActivityIndicator color="black" size="small" />
+        <ActivityIndicator color="black" size="small" style={[styles.icon]} />
       ) : (
         <Image source={iconSource} style={[styles.icon, iconStyle]} />
       )}
