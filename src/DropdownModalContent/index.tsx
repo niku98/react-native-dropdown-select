@@ -1,9 +1,9 @@
 import React, {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
-  useEffect,
 } from 'react';
 import {
   Animated,
@@ -12,11 +12,16 @@ import {
   InteractionManager,
   LayoutChangeEvent,
   ListRenderItem,
+  Platform,
   StyleProp,
   TouchableWithoutFeedback,
   View,
   ViewStyle,
 } from 'react-native';
+import {
+  useSafeAreaFrame,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { DROPDOWN_MIN_WIDTH } from '../constants';
 import type {
   DropdownOption,
@@ -24,12 +29,8 @@ import type {
   Layout,
   Position,
 } from '../types';
-import { styles } from './styles';
-import {
-  useSafeAreaFrame,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
 import { isDropdownOptionItem } from '../utils';
+import { styles } from './styles';
 
 interface DropdownModalProps {
   visible: boolean;
@@ -109,7 +110,7 @@ const DropdownModalContent = ({
         : DROPDOWN_MIN_WIDTH;
 
     let positionStyles: Position = {
-      top: top - 1 - (frame.y > 0 ? 0 : insets.top),
+      top: top - (Platform.OS === 'ios' || frame.y > 0 ? 0 : insets.top),
       left: left,
       width,
     };
@@ -118,8 +119,7 @@ const DropdownModalContent = ({
       positionStyles.top =
         buttonLayout.y -
         dropdownContainerHeight +
-        1 -
-        (frame.y > 0 ? 0 : insets.top);
+        (Platform.OS === 'ios' || frame.y > 0 ? 0 : insets.top);
     }
 
     return positionStyles;
